@@ -48,23 +48,27 @@ async fn update(client: web::Data<PrismaClient>, body: web::Json<UpdateReqBody>)
 async fn get_latest(client: web::Data<PrismaClient>) -> impl Responder {
     let latest = client
         .history()
-        .find_many(vec![])
+        .find_first(vec![])
         .order_by(history::timestamp::order(Direction::Desc))
         .exec()
         .await
-        .unwrap()[0].clone();
+        .unwrap();
+    match latest {
+        None => { HttpResponse::Ok().json("No data found.") }
+        Some(data) => {
+            let response = serde_json::json!({
+            "code": 200,
+            "data": {
+                "co2": data.co_2,
+                "tvoc": data.tvoc,
+                "time": time_format(data.timestamp),
+                "id": data.id
+                }
+            });
 
-    let response = serde_json::json!({
-        "code": 200,
-        "data": {
-            "co2": latest.co_2,
-            "tvoc": latest.tvoc,
-            "time": time_format(latest.timestamp),
-            "id": latest.id
+            HttpResponse::Ok().json(response)
         }
-    });
-
-    HttpResponse::Ok().json(response)
+    }
 }
 
 
