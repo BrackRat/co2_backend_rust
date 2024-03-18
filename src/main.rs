@@ -69,8 +69,9 @@ async fn get_latest(client: web::Data<PrismaClient>) -> impl Responder {
 async fn get_history_chart(client: web::Data<PrismaClient>) -> impl Responder {
     let latest = client
         .history()
-        .find_first(vec![]) // 使用 find_first 方法获取最新的一条记录
-        .order_by(history::timestamp::order(Direction::Desc)) // 增加排序条件
+        .find_many(vec![])
+        .order_by(history::timestamp::order(Direction::Desc))
+        .take(8640)
         .exec()
         .await
         .unwrap();
