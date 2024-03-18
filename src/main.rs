@@ -10,6 +10,12 @@ use db::*;
 use prisma_client_rust::Direction;
 
 
+fn time_format(timestamp: i64) -> String {
+    let dt = DateTime::from_timestamp(timestamp, 0).map(|dt| dt.with_timezone(&chrono::Local));
+    let formatted_time = dt.expect("Format time failed").format("%Y-%m-%d %H:%M:%S").to_string();
+    formatted_time
+}
+
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
@@ -48,15 +54,12 @@ async fn get_latest(client: web::Data<PrismaClient>) -> impl Responder {
         .await
         .unwrap()[0].clone();
 
-    let dt = DateTime::from_timestamp(latest.timestamp, 0);
-    let formatted_time = dt.expect("Format time failed").format("%Y-%m-%d %H:%M:%S").to_string();
-
     let response = serde_json::json!({
         "code": 200,
         "data": {
             "co2": latest.co_2,
             "tvoc": latest.tvoc,
-            "time": formatted_time,
+            "time": time_format(latest.timestamp),
             "id": latest.id
         }
     });
@@ -79,9 +82,7 @@ async fn get_history_chart(client: web::Data<PrismaClient>) -> impl Responder {
     let history_data = latest
         .iter()
         .map(|history| {
-            let dt = DateTime::from_timestamp(history.timestamp, 0);
-            let formatted_time = dt.expect("F").format("%Y-%m-%d %H:%M:%S").to_string();
-            (formatted_time, history.co_2, history.tvoc)
+            (time_format(history.timestamp), history.co_2, history.tvoc)
         })
         .collect::<Vec<(String, i32, i32)>>();
 
