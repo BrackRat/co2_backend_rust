@@ -40,7 +40,6 @@ async fn update(client: web::Data<PrismaClient>, body: web::Json<UpdateReqBody>)
 
 #[get("/status")]
 async fn get_latest(client: web::Data<PrismaClient>) -> impl Responder {
-    // ToDo Performance improvement
     let latest = client
         .history()
         .find_many(vec![])
@@ -49,7 +48,6 @@ async fn get_latest(client: web::Data<PrismaClient>) -> impl Responder {
         .await
         .unwrap()[0].clone();
 
-    // generate formatted time from latest.timestamp like "%Y-%m-%d %H:%M:%S"
     let dt = DateTime::from_timestamp(latest.timestamp, 0);
     let formatted_time = dt.expect("Format time failed").format("%Y-%m-%d %H:%M:%S").to_string();
 
@@ -58,7 +56,8 @@ async fn get_latest(client: web::Data<PrismaClient>) -> impl Responder {
         "data": {
             "co2": latest.co_2,
             "tvoc": latest.tvoc,
-            "time": formatted_time
+            "time": formatted_time,
+            "id": latest.id
         }
     });
 
@@ -70,8 +69,8 @@ async fn get_latest(client: web::Data<PrismaClient>) -> impl Responder {
 async fn get_history_chart(client: web::Data<PrismaClient>) -> impl Responder {
     let latest = client
         .history()
-        .find_many(vec![])
-        .order_by(history::timestamp::order(Direction::Desc))
+        .find_first(vec![]) // 使用 find_first 方法获取最新的一条记录
+        .order_by(history::timestamp::order(Direction::Desc)) // 增加排序条件
         .exec()
         .await
         .unwrap();
