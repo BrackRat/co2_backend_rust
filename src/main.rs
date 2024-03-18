@@ -98,8 +98,10 @@ async fn get_history_chart(client: web::Data<PrismaClient>) -> impl Responder {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let client = web::Data::new(PrismaClient::_builder().build().await.unwrap());
+    let ip = "127.0.0.1";
+    let port = 5010;
 
-    println!("Server Start");
+    println!("Listening on {}:{}", ip, port);
 
     HttpServer::new(move || {
         App::new()
@@ -109,7 +111,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_latest)
             .service(get_history_chart)
     })
-        .bind(("127.0.0.1", 5010))?
+        .bind((ip, port))?
         .run()
         .await
 }
