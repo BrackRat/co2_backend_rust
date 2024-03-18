@@ -9,8 +9,8 @@ generator client {
 }
 
 model History {
-  id        Int @id @unique @default(autoincrement())
-  timestamp Int
+  id        Int    @id @unique @default(autoincrement())
+  timestamp BigInt
   co2       Int
   tvoc      Int
 }

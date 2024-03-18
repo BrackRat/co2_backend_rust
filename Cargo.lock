@@ -667,6 +667,7 @@ name = "co2_backend"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "chrono",
  "prisma-client-rust",
  "serde",
  "serde_json",
