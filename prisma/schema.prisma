@@ -1,0 +1,16 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "cargo prisma"
+  output   = "../src/db.rs"
+}
+
+model History {
+  id        Int @id @unique @default(autoincrement())
+  timestamp Int
+  co2       Int
+  tvoc      Int
+}
